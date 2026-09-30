@@ -8,20 +8,17 @@ export function calculateTotals() {
     });
     document.getElementById('totalCashDisplay').innerText = '৳' + totalCash.toFixed(2);
 
-    // 2. Card Total (49, 39, 29, 19 Tk calculation)
+    // 2. Card Total
     let totalCard = 0;
     document.querySelectorAll('.card-input').forEach(input => {
         let qty = parseFloat(input.value) || 0;
         let price = parseFloat(input.getAttribute('data-price')) || 0;
         totalCard += qty * price;
     });
-    
     const cardDisplay = document.getElementById('totalCardDisplay');
-    if (cardDisplay) {
-        cardDisplay.innerText = '৳' + totalCard.toFixed(2);
-    }
+    if (cardDisplay) cardDisplay.innerText = '৳' + totalCard.toFixed(2);
 
-    // 3. Mobile Banking Total (Agents + All Dynamic Personals combined via .mb-input class)
+    // 3. Mobile Banking Total
     let totalMb = 0;
     document.querySelectorAll('.mb-input').forEach(input => {
         totalMb += parseFloat(input.value) || 0;
@@ -37,12 +34,20 @@ export function calculateTotals() {
     let totalLoad = loadGp + loadBl + loadAirtel + loadRobi + loadTeletalk;
     document.getElementById('totalLoadDisplay').innerText = '৳' + totalLoad.toFixed(2);
 
-    // 5. Expenses & Owed
+    // 5. More Section Total (Dokane ache, Bulk money, More bKash personals)
+    let totalMore = 0;
+    document.querySelectorAll('.more-input').forEach(input => {
+        totalMore += parseFloat(input.value) || 0;
+    });
+    const moreDisplay = document.getElementById('totalMoreDisplay');
+    if (moreDisplay) moreDisplay.innerText = '৳' + totalMore.toFixed(2);
+
+    // 6. Expenses & Owed
     let expTotal = parseFloat(document.getElementById('expTotal').value) || 0;
     let owedTotal = parseFloat(document.getElementById('owedTotal').value) || 0;
 
-    // Grand Total
-    let grandTotal = totalCash + totalCard + totalMb + totalLoad + owedTotal - expTotal;
+    // Grand Total (Cash + Card + Mobile Banking + Load + More + Owed - Expenses)
+    let grandTotal = totalCash + totalCard + totalMb + totalLoad + totalMore + owedTotal - expTotal;
     document.getElementById('grandTotal').innerText = '৳' + grandTotal.toFixed(2);
 
     // Profit / Loss calculation vs Previous Day

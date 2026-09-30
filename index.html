@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-gray-100 font-sans pb-24">
+<body class="bg-gray-100 font-sans pb-28">
 
     <!-- Header -->
     <header class="bg-blue-600 text-white p-3 shadow-md sticky top-0 z-50">
@@ -29,6 +29,7 @@
             <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
             <span class="text-xs text-gray-500 font-medium">Loading...</span>
         </div>
+
         <!-- Previous Day & Profit/Loss Card -->
         <section class="bg-white p-3 rounded-xl shadow-sm space-y-2">
             <div class="flex justify-between items-center">
@@ -40,23 +41,53 @@
             </div>
         </section>
 
-        <!-- 1. CASH TAB -->
-        <div id="tab-cash" class="tab-content space-y-3">
-            <h2 class="text-md font-bold text-blue-600 bg-blue-50 p-2 rounded">Cash Notes Calculation</h2>
-            <div class="bg-white p-3 rounded-xl shadow-sm space-y-2" id="cashSection">
-                <div class="flex justify-between items-center py-1 border-b"><span>৳1,000 Note</span><input type="number" value="0" data-val="1000" class="cash-input w-20 p-1 border rounded text-right"></div>
-                <div class="flex justify-between items-center py-1 border-b"><span>৳500 Note</span><input type="number" value="0" data-val="500" class="cash-input w-20 p-1 border rounded text-right"></div>
-                <div class="flex justify-between items-center py-1 border-b"><span>৳200 Note</span><input type="number" value="0" data-val="200" class="cash-input w-20 p-1 border rounded text-right"></div>
-                <div class="flex justify-between items-center py-1 border-b"><span>৳100 Note</span><input type="number" value="0" data-val="100" class="cash-input w-20 p-1 border rounded text-right"></div>
-                <div class="flex justify-between items-center py-1 border-b"><span>৳50 Note</span><input type="number" value="0" data-val="50" class="cash-input w-20 p-1 border rounded text-right"></div>
-                <div class="flex justify-between items-center py-1 border-b"><span>৳20 Note</span><input type="number" value="0" data-val="20" class="cash-input w-20 p-1 border rounded text-right"></div>
-                <div class="flex justify-between items-center py-1"><span>৳10 Note</span><input type="number" value="0" data-val="10" class="cash-input w-20 p-1 border rounded text-right"></div>
+        <!-- 1. CASH & DRAWER TAB -->
+        <div id="tab-cash" class="tab-content space-y-4">
+            <!-- Cash Notes Calculation -->
+            <div class="space-y-2">
+                <h2 class="text-md font-bold text-blue-600 bg-blue-50 p-2 rounded">Cash Notes Calculation</h2>
+                <div class="bg-white p-3 rounded-xl shadow-sm space-y-2" id="cashSection">
+                    <div class="flex justify-between items-center py-1 border-b"><span>৳1,000 Note</span><input type="number" value="0" data-val="1000" class="cash-input w-20 p-1 border rounded text-right"></div>
+                    <div class="flex justify-between items-center py-1 border-b"><span>৳500 Note</span><input type="number" value="0" data-val="500" class="cash-input w-20 p-1 border rounded text-right"></div>
+                    <div class="flex justify-between items-center py-1 border-b"><span>৳200 Note</span><input type="number" value="0" data-val="200" class="cash-input w-20 p-1 border rounded text-right"></div>
+                    <div class="flex justify-between items-center py-1 border-b"><span>৳100 Note</span><input type="number" value="0" data-val="100" class="cash-input w-20 p-1 border rounded text-right"></div>
+                    <div class="flex justify-between items-center py-1 border-b"><span>৳50 Note</span><input type="number" value="0" data-val="50" class="cash-input w-20 p-1 border rounded text-right"></div>
+                    <div class="flex justify-between items-center py-1 border-b"><span>৳20 Note</span><input type="number" value="0" data-val="20" class="cash-input w-20 p-1 border rounded text-right"></div>
+                    <div class="flex justify-between items-center py-1"><span>৳10 Note</span><input type="number" value="0" data-val="10" class="cash-input w-20 p-1 border rounded text-right"></div>
+                </div>
+                <div class="text-right font-bold text-gray-700">Total Cash: <span id="totalCashDisplay">৳0.00</span></div>
             </div>
-            <div class="text-right font-bold text-gray-700">Total Cash: <span id="totalCashDisplay">৳0.00</span></div>
+
+            <!-- Drawer & Bulk Money Section -->
+            <div class="bg-white p-4 rounded-xl shadow-sm space-y-3">
+                <h2 class="text-sm font-bold text-gray-800 border-b pb-2">Drawer & Bulk Money</h2>
+                <div>
+                    <label class="text-xs text-gray-600 block font-medium mb-1">Drawer Amount:</label>
+                    <input type="number" id="drawerInput" class="calc-trigger w-full p-2 border rounded text-right text-sm" value="0">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-600 block font-medium mb-1">Bulk Money:</label>
+                    <input type="number" id="bulkMoneyInput" class="calc-trigger w-full p-2 border rounded text-right text-sm" value="0">
+                </div>
+            </div>
+
+            <!-- Expenses & Owed Section -->
+            <div class="bg-white p-3 rounded-xl shadow-sm space-y-3">
+                <h2 class="text-sm font-bold text-gray-800 border-b pb-2">Expenses & Owed (Baki)</h2>
+                <div><label class="text-xs text-gray-600 block mb-1">Total Expenses (Khoroch):</label><input type="number" id="expTotal" value="0" class="calc-trigger w-full p-2 border rounded text-right"></div>
+                <div><label class="text-xs text-gray-600 block mb-1">Total Owed / Tally Khata (Baki):</label><input type="number" id="owedTotal" value="0" class="calc-trigger w-full p-2 border rounded text-right"></div>
+            </div>
+
+            <!-- Save & Export Actions -->
+            <div class="pt-2 flex gap-2">
+                <button id="saveBtn" class="flex-1 bg-green-600 text-white p-2.5 rounded-lg font-bold text-sm shadow">Save Data</button>
+                <button id="exportBtn" class="flex-1 bg-purple-600 text-white p-2.5 rounded-lg font-bold text-sm shadow">Download JSON</button>
+            </div>
         </div>
 
-        <!-- 2. CARD TAB -->
-        <div id="tab-card" class="tab-content hidden space-y-3">
+        <!-- 2. FLEXI TAB (Card Sales & Flexiload Combined) -->
+        <div id="tab-flexi" class="tab-content hidden space-y-4">
+            <!-- Card Sales Section -->
             <section class="bg-white p-4 rounded-xl shadow-sm space-y-4">
                 <h2 class="text-base font-bold text-gray-800 border-b pb-2">Card Sales (49, 39, 29, 19 Tk)</h2>
                 
@@ -154,9 +185,22 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Flexiload Balance Section -->
+            <div class="space-y-2">
+                <h2 class="text-md font-bold text-blue-600 bg-blue-50 p-2 rounded">Flexiload Balance</h2>
+                <div class="bg-white p-3 rounded-xl shadow-sm space-y-2">
+                    <div class="flex justify-between items-center py-1 border-b"><span>GP Load</span><input type="number" id="loadGp" value="0" class="calc-trigger w-28 p-1 border rounded text-right"></div>
+                    <div class="flex justify-between items-center py-1 border-b"><span>Banglalink Load</span><input type="number" id="loadBl" value="0" class="calc-trigger w-28 p-1 border rounded text-right"></div>
+                    <div class="flex justify-between items-center py-1 border-b"><span>Airtel Load</span><input type="number" id="loadAirtel" value="0" class="calc-trigger w-28 p-1 border rounded text-right"></div>
+                    <div class="flex justify-between items-center py-1 border-b"><span>Robi Load</span><input type="number" id="loadRobi" value="0" class="calc-trigger w-28 p-1 border rounded text-right"></div>
+                    <div class="flex justify-between items-center py-1"><span>Teletalk Load</span><input type="number" id="loadTeletalk" value="0" class="calc-trigger w-28 p-1 border rounded text-right"></div>
+                </div>
+                <div class="text-right font-bold text-gray-700">Total Load: <span id="totalLoadDisplay">৳0.00</span></div>
+            </div>
         </div>
 
-        <!-- 3. MOBILE BANKING TAB -->
+        <!-- 3. M-BANKING TAB -->
         <div id="tab-mb" class="tab-content hidden space-y-3">
             <section class="bg-white p-4 rounded-xl shadow-sm space-y-4">
                 <h2 class="text-base font-bold text-gray-800 border-b pb-2">Mobile Banking (Agent & Personal)</h2>
@@ -190,9 +234,7 @@
                         <h3 class="text-xs font-bold text-pink-600 uppercase tracking-wider">bKash Personal</h3>
                         <button type="button" id="addBkashPersonal" class="text-xs bg-pink-50 text-pink-600 px-2 py-1 rounded font-medium hover:bg-pink-100">+ Add Personal</button>
                     </div>
-                    <div id="bkashPersonalContainer" class="space-y-2">
-                        <!-- Dynamic rows will be added here -->
-                    </div>
+                    <div id="bkashPersonalContainer" class="space-y-2"></div>
                 </div>
 
                 <!-- Nagad Personals (Dynamic) -->
@@ -201,9 +243,7 @@
                         <h3 class="text-xs font-bold text-orange-600 uppercase tracking-wider">Nagad Personal</h3>
                         <button type="button" id="addNagadPersonal" class="text-xs bg-orange-50 text-orange-600 px-2 py-1 rounded font-medium hover:bg-orange-100">+ Add Personal</button>
                     </div>
-                    <div id="nagadPersonalContainer" class="space-y-2">
-                        <!-- Dynamic rows will be added here -->
-                    </div>
+                    <div id="nagadPersonalContainer" class="space-y-2"></div>
                 </div>
 
                 <!-- Rocket Personals (Dynamic) -->
@@ -212,9 +252,7 @@
                         <h3 class="text-xs font-bold text-purple-600 uppercase tracking-wider">Rocket Personal</h3>
                         <button type="button" id="addRocketPersonal" class="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded font-medium hover:bg-purple-100">+ Add Personal</button>
                     </div>
-                    <div id="rocketPersonalContainer" class="space-y-2">
-                        <!-- Dynamic rows will be added here -->
-                    </div>
+                    <div id="rocketPersonalContainer" class="space-y-2"></div>
                 </div>
 
                 <!-- Total Mobile Banking Display -->
@@ -225,43 +263,14 @@
             </section>
         </div>
 
-        <!-- 4. LOAD TAB -->
-        <div id="tab-load" class="tab-content hidden space-y-3">
-            <h2 class="text-md font-bold text-blue-600 bg-blue-50 p-2 rounded">Flexiload Balance</h2>
-            <div class="bg-white p-3 rounded-xl shadow-sm space-y-2">
-                <div class="flex justify-between items-center py-1 border-b"><span>GP Load</span><input type="number" id="loadGp" value="0" class="calc-trigger w-28 p-1 border rounded text-right"></div>
-                <div class="flex justify-between items-center py-1 border-b"><span>Banglalink Load</span><input type="number" id="loadBl" value="0" class="calc-trigger w-28 p-1 border rounded text-right"></div>
-                <div class="flex justify-between items-center py-1 border-b"><span>Airtel Load</span><input type="number" id="loadAirtel" value="0" class="calc-trigger w-28 p-1 border rounded text-right"></div>
-                <div class="flex justify-between items-center py-1 border-b"><span>Robi Load</span><input type="number" id="loadRobi" value="0" class="calc-trigger w-28 p-1 border rounded text-right"></div>
-                <div class="flex justify-between items-center py-1"><span>Teletalk Load</span><input type="number" id="loadTeletalk" value="0" class="calc-trigger w-28 p-1 border rounded text-right"></div>
-            </div>
-            <div class="text-right font-bold text-gray-700">Total Load: <span id="totalLoadDisplay">৳0.00</span></div>
-        </div>
-
-        <!-- 5. MORE & SAVE TAB -->
-        <div id="tab-exp" class="tab-content hidden space-y-3">
-            <h2 class="text-md font-bold text-blue-600 bg-blue-50 p-2 rounded">Expenses & Owed (Baki)</h2>
-            <div class="bg-white p-3 rounded-xl shadow-sm space-y-3">
-                <div><label class="text-xs text-gray-600 block mb-1">Total Expenses (Khoroch):</label><input type="number" id="expTotal" value="0" class="calc-trigger w-full p-2 border rounded text-right"></div>
-                <div><label class="text-xs text-gray-600 block mb-1">Total Owed / Tally Khata (Baki):</label><input type="number" id="owedTotal" value="0" class="calc-trigger w-full p-2 border rounded text-right"></div>
-            </div>
-            
-            <div class="pt-4 flex gap-2">
-                <button id="saveBtn" class="flex-1 bg-green-600 text-white p-2.5 rounded-lg font-bold text-sm shadow">Save Data</button>
-                <button id="exportBtn" class="flex-1 bg-purple-600 text-white p-2.5 rounded-lg font-bold text-sm shadow">Download JSON</button>
-            </div>
-        </div>
-
     </main>
 
-    <!-- Bottom Navbar -->
+    <!-- Bottom Navbar (3 Items) -->
     <nav class="bg-white border-t fixed bottom-0 left-0 right-0 shadow-lg z-50">
-        <div class="max-w-md mx-auto flex justify-around py-2 text-xs text-gray-600">
+        <div class="max-w-md mx-auto flex justify-around py-2.5 text-xs text-gray-600">
             <button class="nav-btn flex flex-col items-center text-blue-600 font-bold" data-target="cash"><span class="text-lg">💵</span><span>Cash</span></button>
-            <button class="nav-btn flex flex-col items-center" data-target="card"><span class="text-lg">💳</span><span>Card</span></button>
-            <button class="nav-btn flex flex-col items-center" data-target="mb"><span class="text-lg">📱</span><span>M-Banking</span></button>
-            <button class="nav-btn flex flex-col items-center" data-target="load"><span class="text-lg">⚡</span><span>Load</span></button>
-            <button class="nav-btn flex flex-col items-center" data-target="exp"><span class="text-lg">📋</span><span>More/Save</span></button>
+            <button class="nav-btn flex flex-col items-center" data-target="flexi"><span class="text-lg">⚡</span><span>Flexi</span></button>
+            <button class="nav-btn flex flex-col items-center" data-target="mb"><span class="text-lg">📱</span><span>M-Bank</span></button>
         </div>
     </nav>
 

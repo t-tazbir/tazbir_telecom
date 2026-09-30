@@ -5,14 +5,14 @@ export function initUI() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('currentDate').value = today;
 
-    // Attach listener to Add buttons
+    // Attach listeners to Add buttons for Mobile Banking
     document.getElementById('addBkashPersonal').addEventListener('click', () => addPersonalRow('bkashPersonalContainer', 'bKash Personal'));
     document.getElementById('addNagadPersonal').addEventListener('click', () => addPersonalRow('nagadPersonalContainer', 'Nagad Personal'));
     document.getElementById('addRocketPersonal').addEventListener('click', () => addPersonalRow('rocketPersonalContainer', 'Rocket Personal'));
 
     loadDataToUI(today);
 
-    // Global input listener (focus/blur & calculation)
+    // Global input listener
     document.querySelectorAll('input').forEach(input => {
         attachInputEvents(input);
     });
@@ -42,7 +42,6 @@ export function initUI() {
     });
 }
 
-// Helper to attach focus/blur & input calculation behavior
 function attachInputEvents(input) {
     input.addEventListener('input', () => calculateTotals());
 
@@ -58,7 +57,6 @@ function attachInputEvents(input) {
     });
 }
 
-// Dynamic row creator function
 export function addPersonalRow(containerId, providerName, labelText = '', value = '0') {
     const container = document.getElementById(containerId);
     const rowCount = container.children.length + 1;
@@ -108,6 +106,8 @@ function gatherFormData(date) {
         date: date,
         prevTotal: document.getElementById('prevTotal').value,
         cashInputs: Array.from(document.querySelectorAll('.cash-input')).map(i => i.value),
+        drawer: document.getElementById('drawerInput').value,
+        bulkMoney: document.getElementById('bulkMoneyInput').value,
         cards: cardsData,
         mb: {
             agents: {
@@ -135,7 +135,7 @@ function gatherFormData(date) {
 function loadDataToUI(date) {
     let d = loadFromStorage(date);
     
-    // Clear dynamic containers first
+    // Clear dynamic containers
     document.getElementById('bkashPersonalContainer').innerHTML = '';
     document.getElementById('nagadPersonalContainer').innerHTML = '';
     document.getElementById('rocketPersonalContainer').innerHTML = '';
@@ -148,7 +148,9 @@ function loadDataToUI(date) {
             cashInputs.forEach((inp, idx) => inp.value = d.cashInputs[idx]);
         }
 
-        // Load Card Data
+        document.getElementById('drawerInput').value = d.drawer || 0;
+        document.getElementById('bulkMoneyInput').value = d.bulkMoney || 0;
+
         if (d.cards) {
             document.querySelectorAll('.card-input').forEach(input => {
                 let vendor = input.getAttribute('data-vendor');
@@ -161,21 +163,13 @@ function loadDataToUI(date) {
             });
         }
 
-        // Load MB Agents
         if (d.mb && d.mb.agents) {
             document.getElementById('mbBkashAgent').value = d.mb.agents.bkash || 0;
             document.getElementById('mbNagadAgent').value = d.mb.agents.nagad || 0;
             document.getElementById('mbRocketAgent').value = d.mb.agents.rocket || 0;
             document.getElementById('mbUpaiAgent').value = d.mb.agents.upai || 0;
-        } else if (d.mb) {
-            // Backward compatibility
-            document.getElementById('mbBkashAgent').value = d.mb.bkash || 0;
-            document.getElementById('mbNagadAgent').value = d.mb.nagad || 0;
-            document.getElementById('mbRocketAgent').value = d.mb.rocket || 0;
-            document.getElementById('mbUpaiAgent').value = d.mb.upai || 0;
         }
 
-        // Load Dynamic Personals
         if (d.mb && d.mb.bkashPersonals) {
             d.mb.bkashPersonals.forEach(p => addPersonalRow('bkashPersonalContainer', 'bKash Personal', p.label, p.val));
         }
@@ -186,16 +180,27 @@ function loadDataToUI(date) {
             d.mb.rocketPersonals.forEach(p => addPersonalRow('rocketPersonalContainer', 'Rocket Personal', p.label, p.val));
         }
 
+        if (d.load) {
+            document.getElementById('loadGp').value = d.load.gp || 0;
+            document.getElementById('loadBl').value = d.load.bl || 0;
+            document.getElementById('loadAirtel').value = d.load.airtel || 0;
+            document.getElementById('loadRobi').value = d.load.robi || 0;
+            document.getElementById('loadTeletalk').value = d.load.teletalk || 0;
+        }
+
         document.getElementById('expTotal').value = d.expTotal || 0;
         document.getElementById('owedTotal').value = d.owedTotal || 0;
     } else {
         document.getElementById('prevTotal').value = '';
         document.querySelectorAll('.cash-input').forEach(i => i.value = 0);
+        document.getElementById('drawerInput').value = 0;
+        document.getElementById('bulkMoneyInput').value = 0;
         document.querySelectorAll('.card-input').forEach(i => i.value = 0);
         document.getElementById('mbBkashAgent').value = 0;
         document.getElementById('mbNagadAgent').value = 0;
         document.getElementById('mbRocketAgent').value = 0;
         document.getElementById('mbUpaiAgent').value = 0;
+        document.querySelectorAll('#tab-flexi input').forEach(i => i.value = 0);
         document.getElementById('expTotal').value = 0;
         document.getElementById('owedTotal').value = 0;
     }
