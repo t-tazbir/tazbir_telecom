@@ -1,23 +1,15 @@
+// Clean auto-saving functionality. Export endpoints have been removed as per specification.
 export function saveToStorage(date, dataObj) {
-    localStorage.setItem('dokan_' + date, JSON.stringify(dataObj));
+    if(!date) return;
+    localStorage.setItem('dokan_pro_' + date, JSON.stringify(dataObj));
 }
 
 export function loadFromStorage(date) {
-    let saved = localStorage.getItem('dokan_' + date);
+    if(!date) return null;
+    let saved = localStorage.getItem('dokan_pro_' + date);
+    
+    // Graceful fallback to legacy key if the user previously used the old app
+    if(!saved) saved = localStorage.getItem('dokan_' + date); 
+    
     return saved ? JSON.parse(saved) : null;
-}
-
-export function exportJson(date) {
-    let saved = localStorage.getItem('dokan_' + date);
-    if (!saved) {
-        alert('Age data save korun!');
-        return;
-    }
-    let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(saved);
-    let downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `dokan_hisab_${date}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
 }

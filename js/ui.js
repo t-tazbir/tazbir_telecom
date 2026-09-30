@@ -1,59 +1,147 @@
-import { saveToStorage, loadFromStorage, exportJson } from './storage.js';
+import { saveToStorage, loadFromStorage } from './storage.js';
 import { calculateTotals } from './calculator.js';
 
 export function initUI() {
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('currentDate').value = today;
+    document.getElementById('currentDateVal').value = today;
 
-    // Attach listeners to Add buttons for Mobile Banking
+    // Theme logic
+    initTheme();
+
+    // Render Custom Date Strip
+    renderDateStrip(today);
+    loadDataToUI(today);
+
+    // Dynamic MB rows
     document.getElementById('addBkashPersonal').addEventListener('click', () => addPersonalRow('bkashPersonalContainer', 'bKash Personal'));
     document.getElementById('addNagadPersonal').addEventListener('click', () => addPersonalRow('nagadPersonalContainer', 'Nagad Personal'));
     document.getElementById('addRocketPersonal').addEventListener('click', () => addPersonalRow('rocketPersonalContainer', 'Rocket Personal'));
 
-    loadDataToUI(today);
+    // Global input listeners
+    document.querySelectorAll('input').forEach(input => attachInputEvents(input));
 
-    // Global input listener
-    document.querySelectorAll('input').forEach(input => {
-        attachInputEvents(input);
+    // Advanced Nav Logic
+    initBottomNav();
+    
+    // Initial Indicator placement
+    setTimeout(() => {
+        const activeBtn = document.querySelector('.nav-btn[data-target="cash"]');
+        if(activeBtn) moveIndicator(activeBtn);
+    }, 100);
+}
+
+function initTheme() {
+    const btn = document.getElementById('themeToggle');
+    const icon = document.getElementById('themeIcon');
+    const html = document.documentElement;
+
+    // Check System preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        html.classList.add('dark');
+        icon.innerText = 'light_mode';
+    }
+
+    btn.addEventListener('click', () => {
+        html.classList.toggle('dark');
+        icon.innerText = html.classList.contains('dark') ? 'light_mode' : 'dark_mode';
+        
+        // Spin animation on toggle
+        icon.style.transform = 'rotate(180deg)';
+        setTimeout(() => icon.style.transform = 'rotate(0deg)', 300);
     });
+}
 
-    document.getElementById('currentDate').addEventListener('change', (e) => {
-        loadDataToUI(e.target.value);
-    });
+function renderDateStrip(selectedDateStr) {
+    const container = document.getElementById('dateStripContainer');
+    container.innerHTML = '';
+    const centerDate = new Date(selectedDateStr);
 
-    document.getElementById('saveBtn').addEventListener('click', () => {
-        let date = document.getElementById('currentDate').value;
-        let dataObj = gatherFormData(date);
-        saveToStorage(date, dataObj);
-        alert('Data successfully mobile storage a save hoyeche!');
-    });
+    // Generates a floating horizontal calendar (last 3 days to next 3 days)
+    for (let i = -3; i <= 3; i++) {
+        let d = new Date(centerDate);
+        d.setDate(d.getDate() + i);
+        let dateStr = d.toISOString().split('T')[0];
+        let dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+        let dayNum = d.getDate();
+        let isSelected = i === 0;
 
-    document.getElementById('exportBtn').addEventListener('click', () => {
-        let date = document.getElementById('currentDate').value;
-        exportJson(date);
-    });
+        let btn = document.createElement('button');
+        btn.className = `flex flex-col items-center justify-center p-2 rounded-2xl min-w-[65px] transition-all duration-300 transform ${
+            isSelected 
+            ? 'bg-gradient-to-tr from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/30 scale-105' 
+            : 'glass-btn text-muted hover:text-main hover:scale-105'
+        }`;
+        btn.innerHTML = `<span class="text-[10px] uppercase tracking-widest opacity-80">${dayName}</span><span class="font-heading font-extrabold text-lg">${dayNum}</span>`;
+        
+        btn.onclick = () => {
+            document.getElementById('currentDateVal').value = dateStr;
+            renderDateStrip(dateStr);
+            loadDataToUI(dateStr);
+            
+            // Scroll to center selected item organically
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        };
+        container.appendChild(btn);
+    }
+}
 
-    // Bottom Navbar Tab Switching with Spinner
+function initBottomNav() {
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             let target = btn.getAttribute('data-target');
-            switchTabWithLoader(target);
+            
+            // Move Indicator
+            moveIndicator(btn);
+
+            // Text/Style active states
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('text-white', 'font-bold');
+                b.classList.add('text-muted', 'font-medium');
+            });
+            btn.classList.remove('text-muted', 'font-medium');
+            btn.classList.add('text-white', 'font-bold');
+
+            // Switch Tab with Loader
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('fade-in');
+            });
+            
+            const spinner = document.getElementById('loadingSpinner');
+            if(spinner) spinner.classList.remove('hidden');
+
+            setTimeout(() => {
+                if(spinner) spinner.classList.add('hidden');
+                const targetTab = document.getElementById('tab-' + target);
+                targetTab.classList.remove('hidden');
+                // Trigger reflow for animation
+                void targetTab.offsetWidth; 
+                targetTab.classList.add('fade-in');
+            }, 250);
         });
     });
 }
 
+function moveIndicator(activeBtn) {
+    const indicator = document.getElementById('navIndicator');
+    const navBar = activeBtn.parentElement;
+    
+    // Calculate exact width and offset for the animated background pill
+    const navRect = navBar.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    
+    // 8px padding adjustment from parent
+    const offset = btnRect.left - navRect.left;
+    
+    indicator.style.width = `${btnRect.width}px`;
+    indicator.style.transform = `translateX(${offset}px)`;
+}
+
 function attachInputEvents(input) {
     input.addEventListener('input', () => calculateTotals());
-
-    input.addEventListener('focus', function() {
-        if (this.value === '0') this.value = '';
-    });
-
+    input.addEventListener('focus', function() { if (this.value === '0') this.value = ''; });
     input.addEventListener('blur', function() {
-        if (this.value === '') {
-            this.value = '0';
-            calculateTotals();
-        }
+        if (this.value === '') { this.value = '0'; calculateTotals(); }
     });
 }
 
@@ -63,19 +151,28 @@ export function addPersonalRow(containerId, providerName, labelText = '', value 
     const defaultLabel = labelText || `${providerName} ${rowCount}`;
 
     const rowDiv = document.createElement('div');
-    rowDiv.className = 'flex items-center space-x-2 dynamic-mb-row';
+    rowDiv.className = 'flex items-center space-x-2 dynamic-mb-row animate-[fadeIn_0.3s_ease-out]';
     rowDiv.innerHTML = `
-        <input type="text" class="w-1/2 p-2 border rounded-md text-xs bg-gray-50 personal-label" value="${defaultLabel}">
-        <input type="number" class="w-1/2 p-2 border rounded-md text-center text-sm bg-white mb-input dynamic-mb-input" value="${value}">
-        <button type="button" class="text-red-500 hover:text-red-700 text-sm px-2 remove-row">✕</button>
+        <input type="text" class="w-1/2 input-premium text-xs personal-label" value="${defaultLabel}">
+        <input type="number" class="w-1/2 input-premium text-center font-bold text-sm mb-input dynamic-mb-input" value="${value}">
+        <button type="button" class="p-1 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-full transition-colors remove-row">
+            <span class="material-symbols-rounded text-sm">close</span>
+        </button>
     `;
 
     const numInput = rowDiv.querySelector('.dynamic-mb-input');
     attachInputEvents(numInput);
+    
+    // Update local text inputs to trigger save as well
+    rowDiv.querySelector('.personal-label').addEventListener('change', () => saveCurrentData());
 
     rowDiv.querySelector('.remove-row').addEventListener('click', () => {
-        rowDiv.remove();
-        calculateTotals();
+        rowDiv.style.opacity = '0';
+        rowDiv.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+            rowDiv.remove();
+            calculateTotals();
+        }, 200);
     });
 
     container.appendChild(rowDiv);
@@ -93,7 +190,10 @@ function getPersonalRowsData(containerId) {
     return rows;
 }
 
-function gatherFormData(date) {
+export function saveCurrentData() {
+    let date = document.getElementById('currentDateVal').value;
+    if(!date) return;
+    
     let cardsData = {};
     document.querySelectorAll('.card-input').forEach(input => {
         let vendor = input.getAttribute('data-vendor');
@@ -102,9 +202,8 @@ function gatherFormData(date) {
         cardsData[vendor][price] = input.value || '0';
     });
 
-    return {
+    const dataObj = {
         date: date,
-        prevTotal: document.getElementById('prevTotal').value,
         cashInputs: Array.from(document.querySelectorAll('.cash-input')).map(i => i.value),
         drawer: document.getElementById('drawerInput').value,
         bulkMoney: document.getElementById('bulkMoneyInput').value,
@@ -126,28 +225,23 @@ function gatherFormData(date) {
             airtel: document.getElementById('loadAirtel').value,
             robi: document.getElementById('loadRobi').value,
             teletalk: document.getElementById('loadTeletalk').value
-        },
-        expTotal: document.getElementById('expTotal').value,
-        owedTotal: document.getElementById('owedTotal').value
+        }
     };
+    saveToStorage(date, dataObj);
 }
 
 function loadDataToUI(date) {
     let d = loadFromStorage(date);
     
-    // Clear dynamic containers
     document.getElementById('bkashPersonalContainer').innerHTML = '';
     document.getElementById('nagadPersonalContainer').innerHTML = '';
     document.getElementById('rocketPersonalContainer').innerHTML = '';
 
     if (d) {
-        document.getElementById('prevTotal').value = d.prevTotal || '';
-        
         let cashInputs = document.querySelectorAll('.cash-input');
         if (d.cashInputs && d.cashInputs.length === cashInputs.length) {
             cashInputs.forEach((inp, idx) => inp.value = d.cashInputs[idx]);
         }
-
         document.getElementById('drawerInput').value = d.drawer || 0;
         document.getElementById('bulkMoneyInput').value = d.bulkMoney || 0;
 
@@ -157,9 +251,7 @@ function loadDataToUI(date) {
                 let price = input.getAttribute('data-price');
                 if (d.cards[vendor] && d.cards[vendor][price] !== undefined) {
                     input.value = d.cards[vendor][price];
-                } else {
-                    input.value = '0';
-                }
+                } else { input.value = '0'; }
             });
         }
 
@@ -170,14 +262,10 @@ function loadDataToUI(date) {
             document.getElementById('mbUpaiAgent').value = d.mb.agents.upai || 0;
         }
 
-        if (d.mb && d.mb.bkashPersonals) {
-            d.mb.bkashPersonals.forEach(p => addPersonalRow('bkashPersonalContainer', 'bKash Personal', p.label, p.val));
-        }
-        if (d.mb && d.mb.nagadPersonals) {
-            d.mb.nagadPersonals.forEach(p => addPersonalRow('nagadPersonalContainer', 'Nagad Personal', p.label, p.val));
-        }
-        if (d.mb && d.mb.rocketPersonals) {
-            d.mb.rocketPersonals.forEach(p => addPersonalRow('rocketPersonalContainer', 'Rocket Personal', p.label, p.val));
+        if (d.mb) {
+            if(d.mb.bkashPersonals) d.mb.bkashPersonals.forEach(p => addPersonalRow('bkashPersonalContainer', 'bKash Personal', p.label, p.val));
+            if(d.mb.nagadPersonals) d.mb.nagadPersonals.forEach(p => addPersonalRow('nagadPersonalContainer', 'Nagad Personal', p.label, p.val));
+            if(d.mb.rocketPersonals) d.mb.rocketPersonals.forEach(p => addPersonalRow('rocketPersonalContainer', 'Rocket Personal', p.label, p.val));
         }
 
         if (d.load) {
@@ -187,45 +275,9 @@ function loadDataToUI(date) {
             document.getElementById('loadRobi').value = d.load.robi || 0;
             document.getElementById('loadTeletalk').value = d.load.teletalk || 0;
         }
-
-        document.getElementById('expTotal').value = d.expTotal || 0;
-        document.getElementById('owedTotal').value = d.owedTotal || 0;
     } else {
-        document.getElementById('prevTotal').value = '';
-        document.querySelectorAll('.cash-input').forEach(i => i.value = 0);
-        document.getElementById('drawerInput').value = 0;
-        document.getElementById('bulkMoneyInput').value = 0;
-        document.querySelectorAll('.card-input').forEach(i => i.value = 0);
-        document.getElementById('mbBkashAgent').value = 0;
-        document.getElementById('mbNagadAgent').value = 0;
-        document.getElementById('mbRocketAgent').value = 0;
-        document.getElementById('mbUpaiAgent').value = 0;
-        document.querySelectorAll('#tab-flexi input').forEach(i => i.value = 0);
-        document.getElementById('expTotal').value = 0;
-        document.getElementById('owedTotal').value = 0;
+        // Reset state
+        document.querySelectorAll('input[type="number"]').forEach(i => i.value = 0);
     }
     calculateTotals();
-}
-
-function switchTabWithLoader(tabName) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-
-    const spinner = document.getElementById('loadingSpinner');
-    if (spinner) spinner.classList.remove('hidden');
-
-    document.querySelectorAll('.nav-btn').forEach(b => {
-        b.classList.remove('text-blue-600', 'font-bold');
-        b.classList.add('text-gray-600');
-    });
-
-    const activeBtn = document.querySelector(`.nav-btn[data-target="${tabName}"]`);
-    if (activeBtn) {
-        activeBtn.classList.remove('text-gray-600');
-        activeBtn.classList.add('text-blue-600', 'font-bold');
-    }
-
-    setTimeout(() => {
-        if (spinner) spinner.classList.add('hidden');
-        document.getElementById('tab-' + tabName).classList.remove('hidden');
-    }, 200);
 }

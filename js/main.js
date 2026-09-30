@@ -2,5 +2,5 @@ import { initUI } from './ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initUI();
-    console.log("Dokan Manager Initialized Successfully!");
+    console.log("Premium Dokan Manager Initialized Successfully!");
 });
