@@ -43,20 +43,31 @@
                 </button>
             </div>
             
-            <!-- Grand Total Display -->
-            <div class="text-center mb-4 transform transition-all duration-500 hover:scale-[1.02]">
-                <p class="text-xs font-medium text-muted uppercase tracking-widest mb-1">Live Grand Total</p>
-                <div class="font-heading font-extrabold text-4xl bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent drop-shadow-sm" id="grandTotal">৳0.00</div>
-            </div>
+            <!-- Compact row: always visible, tap to expand the full calendar strip -->
+            <button id="headerCollapseToggle" class="w-full flex items-center justify-between py-1">
+                <span class="text-xs font-medium text-muted uppercase tracking-widest">Grand Total</span>
+                <div class="flex items-center gap-1">
+                    <span class="font-heading font-extrabold text-lg bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent" id="grandTotalCompact">৳0.00</span>
+                    <span class="material-symbols-rounded text-muted text-lg">expand_more</span>
+                </div>
+            </button>
 
-            <!-- Animated Mini Calendar Strip -->
-            <div class="flex gap-2 overflow-x-auto no-scrollbar py-2 px-1" id="dateStripContainer">
-                <!-- Injected via JS -->
+            <div id="headerExpandable" class="header-collapsed">
+                <!-- Grand Total Display -->
+                <div class="text-center mb-2 mt-2 transform transition-all duration-500 hover:scale-[1.02]">
+                    <p class="text-xs font-medium text-muted uppercase tracking-widest mb-1">Live Grand Total</p>
+                    <div class="font-heading font-extrabold text-4xl bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent drop-shadow-sm" id="grandTotal">৳0.00</div>
+                </div>
+
+                <!-- Animated Mini Calendar Strip -->
+                <div class="flex gap-2 overflow-x-auto no-scrollbar py-2 px-1" id="dateStripContainer">
+                    <!-- Injected via JS -->
+                </div>
             </div>
         </div>
     </header>
 
-    <main class="max-w-md mx-auto p-4 space-y-6 relative z-10 pb-36">
+    <main class="max-w-md mx-auto p-4 space-y-6 relative z-10 pb-44">
         
         <div id="loadingSpinner" class="hidden flex flex-col items-center justify-center py-20 space-y-3 fade-in">
             <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -253,26 +264,48 @@
                 </div>
             </div>
         </div>
+
+        <!-- 4. TALLY TAB (Customer Due / Lender Loan / Non-returning Expense) -->
+        <div id="tab-tally" class="tab-content hidden space-y-6 fade-in">
+            <!-- Injected via tally.js -->
+        </div>
+
+        <!-- 5. REPORTS TAB (Daily / Weekly / Monthly profit) -->
+        <div id="tab-reports" class="tab-content hidden space-y-6 fade-in">
+            <!-- Injected via reports.js -->
+        </div>
+
+        <!-- Safety spacer so the last card in any tab never sits under the fixed bottom nav -->
+        <div class="h-8" aria-hidden="true"></div>
     </main>
 
     <!-- Floating Luxury Bottom Navbar -->
     <nav class="fixed bottom-4 left-4 right-4 max-w-md mx-auto z-50">
-        <div class="glass-card rounded-full p-1.5 flex justify-between items-center relative shadow-2xl backdrop-blur-xl border border-glass">
-            
-            <!-- Animated Active Indicator (প্যাডিং অনুযায়ী নিখুঁত পজিশন) -->
-            <div id="navIndicator" class="absolute top-1.5 bottom-1.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-300 ease-out z-0 shadow-lg shadow-blue-500/30"></div>
-            
-            <button class="nav-btn relative z-10 flex-1 flex flex-col items-center py-2 text-white font-bold transition-colors duration-300 group" data-target="cash">
-                <span class="material-symbols-rounded text-xl group-hover:-translate-y-0.5 transition-transform">account_balance_wallet</span>
-                <span class="text-[10px] uppercase tracking-wider mt-0.5">Cash</span>
+        <div id="navBar" class="glass-card rounded-full p-1.5 grid grid-cols-5 items-center relative shadow-2xl backdrop-blur-xl border border-glass">
+
+            <!-- Active indicator: sized/positioned by % of 5 equal columns, not
+                 measured pixel rects, so it always lines up regardless of item count -->
+            <div id="navIndicator" class="absolute top-1.5 bottom-1.5 left-1.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-300 ease-out z-0 shadow-lg shadow-blue-500/30" style="width: calc(20% - 4px);"></div>
+
+            <button class="nav-btn relative z-10 flex flex-col items-center justify-center py-1.5 text-white font-bold transition-colors duration-300 group" data-target="cash">
+                <span class="material-symbols-rounded text-lg group-hover:-translate-y-0.5 transition-transform">account_balance_wallet</span>
+                <span class="text-[9px] uppercase tracking-wide mt-0.5 leading-none">Cash</span>
             </button>
-            <button class="nav-btn relative z-10 flex-1 flex flex-col items-center py-2 text-muted hover:text-main font-medium transition-colors duration-300 group" data-target="flexi">
-                <span class="material-symbols-rounded text-xl group-hover:-translate-y-0.5 transition-transform">speed</span>
-                <span class="text-[10px] uppercase tracking-wider mt-0.5">Flexi</span>
+            <button class="nav-btn relative z-10 flex flex-col items-center justify-center py-1.5 text-muted hover:text-main font-medium transition-colors duration-300 group" data-target="flexi">
+                <span class="material-symbols-rounded text-lg group-hover:-translate-y-0.5 transition-transform">speed</span>
+                <span class="text-[9px] uppercase tracking-wide mt-0.5 leading-none">Flexi</span>
             </button>
-            <button class="nav-btn relative z-10 flex-1 flex flex-col items-center py-2 text-muted hover:text-main font-medium transition-colors duration-300 group" data-target="mb">
-                <span class="material-symbols-rounded text-xl group-hover:-translate-y-0.5 transition-transform">account_balance</span>
-                <span class="text-[10px] uppercase tracking-wider mt-0.5">M-Bank</span>
+            <button class="nav-btn relative z-10 flex flex-col items-center justify-center py-1.5 text-muted hover:text-main font-medium transition-colors duration-300 group" data-target="mb">
+                <span class="material-symbols-rounded text-lg group-hover:-translate-y-0.5 transition-transform">account_balance</span>
+                <span class="text-[9px] uppercase tracking-wide mt-0.5 leading-none">M-Bank</span>
+            </button>
+            <button class="nav-btn relative z-10 flex flex-col items-center justify-center py-1.5 text-muted hover:text-main font-medium transition-colors duration-300 group" data-target="tally">
+                <span class="material-symbols-rounded text-lg group-hover:-translate-y-0.5 transition-transform">receipt_long</span>
+                <span class="text-[9px] uppercase tracking-wide mt-0.5 leading-none">Tally</span>
+            </button>
+            <button class="nav-btn relative z-10 flex flex-col items-center justify-center py-1.5 text-muted hover:text-main font-medium transition-colors duration-300 group" data-target="reports">
+                <span class="material-symbols-rounded text-lg group-hover:-translate-y-0.5 transition-transform">query_stats</span>
+                <span class="text-[9px] uppercase tracking-wide mt-0.5 leading-none">Report</span>
             </button>
         </div>
     </nav>

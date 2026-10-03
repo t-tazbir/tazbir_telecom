@@ -48,6 +48,10 @@ export function calculateTotals() {
     gtElement.innerText = '৳' + grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2});
     setTimeout(() => gtElement.style.transform = 'scale(1)', 150);
 
+    // Mirror into the compact header row (visible even when the full strip is collapsed)
+    const gtCompact = document.getElementById('grandTotalCompact');
+    if (gtCompact) gtCompact.innerText = '৳' + grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2});
+
     // Auto Save triggered on calculations
     saveCurrentData();
 }

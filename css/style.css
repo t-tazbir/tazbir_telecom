@@ -117,6 +117,24 @@ body {
     50% { opacity: .7; transform: scale(1.05); filter: drop-shadow(0 0 15px var(--primary));}
 }
 
+/* Collapsible header: Grand Total + Calendar strip collapsed by default */
+#headerExpandable {
+    overflow: hidden;
+    max-height: 200px;
+    opacity: 1;
+    transition: max-height 0.3s ease, opacity 0.25s ease, margin 0.3s ease;
+}
+#headerExpandable.header-collapsed {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Tally / Report sub-nav pills reuse glass-btn as their inactive state */
+.tally-pill, .report-pill {
+    border: 1px solid var(--card-border);
+}
+
 /* Hide Scrollbar for Strip */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

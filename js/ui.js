@@ -1,5 +1,7 @@
 import { saveToStorage, loadFromStorage } from './storage.js';
 import { calculateTotals } from './calculator.js';
+import { initTally } from './tally.js';
+import { initReports, refreshReports } from './reports.js';
 
 export function initUI() {
     const today = new Date().toISOString().split('T')[0];
@@ -11,6 +13,13 @@ export function initUI() {
     // Render Custom Date Strip
     renderDateStrip(today);
     loadDataToUI(today);
+
+    // New tabs
+    initTally();
+    initReports();
+
+    // Collapsible header (Grand Total + Calendar strip were taking too much space)
+    initHeaderCollapse();
 
     // Dynamic MB rows
     document.getElementById('addBkashPersonal').addEventListener('click', () => addPersonalRow('bkashPersonalContainer', 'bKash Personal'));
@@ -117,24 +126,42 @@ function initBottomNav() {
                 // Trigger reflow for animation
                 void targetTab.offsetWidth; 
                 targetTab.classList.add('fade-in');
+
+                // Reports data can go stale between visits (Tally entries, new
+                // daily saves) — recompute the timeline every time it's opened.
+                if (target === 'reports') refreshReports();
             }, 250);
         });
     });
 }
 
+// The Grand Total + date strip used to eat a lot of vertical space on every
+// tab. Collapsed by default to a single compact line; tapping it expands
+// back to the full calendar strip for picking a different date.
+function initHeaderCollapse() {
+    const toggle = document.getElementById('headerCollapseToggle');
+    const expandable = document.getElementById('headerExpandable');
+    if (!toggle || !expandable) return;
+
+    toggle.addEventListener('click', () => {
+        const isCollapsed = expandable.classList.toggle('header-collapsed');
+        toggle.querySelector('.material-symbols-rounded').innerText = isCollapsed ? 'expand_more' : 'expand_less';
+    });
+}
+
 function moveIndicator(activeBtn) {
     const indicator = document.getElementById('navIndicator');
-    const navBar = activeBtn.parentElement;
-    
-    // Calculate exact width and offset for the animated background pill
-    const navRect = navBar.getBoundingClientRect();
-    const btnRect = activeBtn.getBoundingClientRect();
-    
-    // 8px padding adjustment from parent
-    const offset = btnRect.left - navRect.left;
-    
-    indicator.style.width = `${btnRect.width}px`;
-    indicator.style.transform = `translateX(${offset}px)`;
+    const navBar = document.getElementById('navBar');
+    if (!indicator || !navBar) return;
+
+    // Index-based positioning (not pixel measurement) so the pill always
+    // lines up with its button regardless of how many nav items exist or
+    // whether layout has fully settled yet.
+    const buttons = Array.from(navBar.querySelectorAll('.nav-btn'));
+    const index = buttons.indexOf(activeBtn);
+    if (index === -1) return;
+
+    indicator.style.transform = `translateX(${index * 100}%)`;
 }
 
 function attachInputEvents(input) {
@@ -162,9 +189,11 @@ export function addPersonalRow(containerId, providerName, labelText = '', value 
 
     const numInput = rowDiv.querySelector('.dynamic-mb-input');
     attachInputEvents(numInput);
-    
-    // Update local text inputs to trigger save as well
-    rowDiv.querySelector('.personal-label').addEventListener('change', () => saveCurrentData());
+
+    // Bug fix: the label field previously only saved on 'change' (fires on
+    // blur), so renaming a row and immediately navigating away could lose
+    // the new name. 'input' saves as the user types instead.
+    rowDiv.querySelector('.personal-label').addEventListener('input', () => saveCurrentData());
 
     rowDiv.querySelector('.remove-row').addEventListener('click', () => {
         rowDiv.style.opacity = '0';
